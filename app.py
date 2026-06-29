@@ -32,7 +32,7 @@ def generate_mock_transaction():
         risk_score = round(float(np.random.uniform(75, 99.9)), 1)
     else:
         amount = round(float(np.random.exponential(scale=50) + 5), 2)  # Mostly small daily amounts
-        location = np.random.choice(["New York", "London", "Paris", "Tokyo", "San Francisco"])
+        location = np.random.choice(["New York", "London", "Paris", "Tokyo", "San Francisco", "Milano", "Berlin", "Amsterdam", "Brussel"])
         risk_score = round(float(np.random.uniform(0, 30)), 1)
         
     return {
