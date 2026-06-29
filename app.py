@@ -65,13 +65,17 @@ log_row = st.empty()
 
 # --- CONTINUOUS STREAM LOOP ---
 while run_simulation:
-    # 1. Generate new real-time data point
     new_tx = generate_mock_transaction()
     
-    # 2. Append to session state history
+    # OLD CODE:
+    # st.session_state.transaction_history = pd.concat([
+    #     pd.DataFrame([new_tx]), st.session_state.transaction_history
+    # ]).head(100)
+    
+    # NEW FIXED CODE:
     st.session_state.transaction_history = pd.concat([
         pd.DataFrame([new_tx]), st.session_state.transaction_history
-    ]).head(100) # Keep last 100 transactions for performance
+    ]).reset_index(drop=True).head(100) # Added .reset_index(drop=True) here!
     
     df = st.session_state.transaction_history
     
