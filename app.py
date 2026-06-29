@@ -63,15 +63,17 @@ chart_row = st.empty()
 log_row = st.empty()
 
 # --- FIXED REAL-TIME FRAGMENT ENGINE ---
-# We bind simulation_speed directly here to control the native refresh rate
+# Passing None to run_every explicitly pauses the background timer loop
 @st.fragment(run_every=simulation_speed if run_simulation else None)
 def render_live_dashboard():
     """Isolated rerun scope that updates data and visual elements smoothly without resetting the whole page."""
-    # 1. Pipeline Data Manipulation & Append
-    new_tx = generate_mock_transaction()
-    st.session_state.transaction_history = pd.concat([
-        pd.DataFrame([new_tx]), st.session_state.transaction_history
-    ]).reset_index(drop=True).head(100)  # Capped history window & fixed unique index
+    
+    # ONLY generate and append data if the simulation loop is unpaused
+    if run_simulation:
+        new_tx = generate_mock_transaction()
+        st.session_state.transaction_history = pd.concat([
+            pd.DataFrame([new_tx]), st.session_state.transaction_history
+        ]).reset_index(drop=True).head(100)
     
     df = st.session_state.transaction_history
     
@@ -82,11 +84,17 @@ def render_live_dashboard():
     fraud_rate = (total_fraud / total_tx * 100) if total_tx > 0 else 0
     total_volume = df["Amount"].sum()
     
+    # Status Banner Indicator inside the layout
+    if not run_simulation:
+        st.warning("⏸️ Live Streaming Paused. Showing historical cache capture.")
+    
     # 2. Render Metric Cards
     with metric_row.container():
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("Total Processed (Window)", f"{total_tx}")
-        col2.metric("Fraud Alerts Detected", f"{total_fraud}", delta=f"+1" if new_tx["Is_Fraud"] == 1 else None, delta_color="inverse")
+        # Only show delta if it's running and we actually generated a new transaction
+        has_new_fraud = (run_simulation and new_tx["Is_Fraud"] == 1)
+        col2.metric("Fraud Alerts Detected", f"{total_fraud}", delta=f"+1" if has_new_fraud else None, delta_color="inverse")
         col3.metric("Current Fraud Rate", f"{fraud_rate:.1f}%")
         col4.metric("Monitored Volume", f"${total_volume:,.2f}")
         
@@ -125,7 +133,5 @@ def render_live_dashboard():
         st.dataframe(styled_df, use_container_width=True, height=300, key="live_data_grid")
 
 # --- EXECUTION ENTRANCE ---
-if run_simulation:
-    render_live_dashboard()
-else:
-    st.info("Streaming paused. Toggle 'Start Live Monitoring Stream' in the sidebar to resume.")
+# The function is always invoked so the UI layout is drawn, regardless of toggle state
+render_live_dashboard()
