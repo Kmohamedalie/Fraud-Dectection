@@ -95,14 +95,19 @@ def render_live_dashboard():
         
         with col_left:
             st.subheader("Live Risk Score vs Transaction Amount")
+            
+            # Pass render_mode directly into px.scatter
             fig_scatter = px.scatter(
                 df, x="Amount", y="Risk_Score", color=df["Is_Fraud"].astype(str),
                 color_discrete_map={"0": "#1f77b4", "1": "#ef553b"},
                 labels={"color": "Flagged Fraud"},
-                title="Real-time Anomaly Cluster Mapping"
+                title="Real-time Anomaly Cluster Mapping",
+                render_mode="webgl"  # Added right here!
             )
-            # Force WebGL mode rendering onto GPU to bypass browser SVG element stutter
-            fig_scatter.update_traces(render_mode="webgl")
+            
+            # REMOVE OR COMMENT OUT THIS OLD LINE THAT CAUSED THE ERROR:
+            # fig_scatter.update_traces(render_mode="webgl") 
+            
             st.plotly_chart(fig_scatter, use_container_width=True, key="live_scatter_plot")
             
         with col_right:
