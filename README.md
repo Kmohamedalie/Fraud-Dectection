@@ -45,7 +45,7 @@ The sequential execution follows this order:
 
 4. **State Storage Sync:** The newest transaction is prepended to the user's historical state tracking table (`df`). To prevent memory leaks during long browsing sessions, the historical cache automatically limits its capacity to the most recent 100 activities.
 5. **UI & Layout Compilation:** The calculation engine sums up total volumes, averages fraud alert rates, and pipes the active state table through Plotly Express to redraw the metric widgets, time-series clusters, and geographical distribution pie charts.
-<!--6. **Thread Sleep & Re-trigger:** The script sleeps for the designated fraction of a second chosen by the user and then programmatically issues an internal `st.rerun()` statement to restart the cycle from Step 2 seamlessly.-->
+6. **Thread Sleep & Re-trigger:** The script sleeps for the designated fraction of a second chosen by the user and then programmatically issues an internal `st.rerun()` statement to restart the cycle from Step 2 seamlessly.
 ---
 
 ## 🛠️ Tech Stack
