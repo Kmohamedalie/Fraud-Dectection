@@ -1,8 +1,18 @@
 ---
 
 # 🚨 Real-Time Fraud Monitoring Dashboard
-
 An interactive, high-velocity Streamlit application built to simulate, detect, and analyze fraudulent financial transactions in real-time. This application features live metric tracking, risk anomaly mapping, and geo-location breakdown of suspicious activities.
+
+
+<br/>
+
+
+
+https://github.com/user-attachments/assets/1ba7c037-e65e-4d24-afda-86ac3f6124d1
+
+
+
+<br/>
 
 
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/572dd15a-5c96-476f-a30c-5bc365adea58" /><br/> Image credits Gemini
