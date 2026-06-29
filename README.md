@@ -23,6 +23,25 @@ An interactive, high-velocity Streamlit application built to simulate, detect, a
 * **Data Visualization:** Plotly Express
 * **Environment Containerization:** Docker
 
+
+## 🏗️ Application Architecture
+
+The application uses an efficient, single-process stream simulation loop. Because Streamlit naturally isolates memory spaces for different connections, multiple external users can interact with the app concurrently without impacting each other's live dashboards.
+
+[ User Browser ] <---> 
+[ Streamlit Server Instance ]
+
+                              │
+               ┌──────────────┴──────────────┐
+               ▼                             ▼
+       [ User A Session ]            [ User B Session ]
+        (st.session_state)            (st.session_state)
+               │                             │
+    ┌──────────┴──────────┐       ┌──────────┴──────────┐
+    ▼                     ▼       ▼                     ▼
+    [Mock Generator] ──► [UI Engine] [Mock Generator] ──► [UI Engine]
+    (6% Fraud Bias)      (Plotly)    (6% Fraud Bias)      (Plotly)
+
 ---
 
 ## 📦 Local Installation & Setup
