@@ -5,9 +5,7 @@
 An interactive, high-velocity Streamlit application built to simulate, detect, and analyze fraudulent financial transactions in real-time. This application features live metric tracking, risk anomaly mapping, and geo-location breakdown of suspicious activities.
 
 
-<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/572dd15a-5c96-476f-a30c-5bc365adea58" />
-
-Image credits: Generated using Gemini
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/572dd15a-5c96-476f-a30c-5bc365adea58" /><br/> Image credits Gemini
 
 
 ---
@@ -20,6 +18,24 @@ Image credits: Generated using Gemini
 * **Advanced Visualizations:** Uses Plotly Express to render real-time scatter plots for anomaly clusters and geographical risk distribution charts.
 * **Isolated User Sessions:** Built using Streamlit's structural session state, allowing multiple external users to interact with the dashboard simultaneously without cross-interfering.
 
+
+---
+
+### Application Logical Flow
+
+The sequential execution follows this order:
+
+1. **User Connection Initialization:** An external user accesses the Streamlit web server. The server instantly establishes an isolated workspace (`st.session_state`) dedicated purely to that user's session.
+2. **Configuration Load:** The application checks the sidebar configuration values (e.g., whether the live stream is active and the speed delay setting).
+3. **Data Generation Loop:**
+* A simulated background transactional engine creates a dummy transaction payload.
+* A heuristic evaluator inspects the payload using predetermined risk factors (such as suspicious geolocation or abnormally high withdrawal limits).
+* Transactions crossing these thresholds are tagged as anomalies (`Is_Fraud = 1`) and assigned a high risk coefficient score.
+
+
+4. **State Storage Sync:** The newest transaction is prepended to the user's historical state tracking table (`df`). To prevent memory leaks during long browsing sessions, the historical cache automatically limits its capacity to the most recent 100 activities.
+5. **UI & Layout Compilation:** The calculation engine sums up total volumes, averages fraud alert rates, and pipes the active state table through Plotly Express to redraw the metric widgets, time-series clusters, and geographical distribution pie charts.
+6. **Thread Sleep & Re-trigger:** The script sleeps for the designated fraction of a second chosen by the user and then programmatically issues an internal `st.rerun()` statement to restart the cycle from Step 2 seamlessly.
 ---
 
 ## 🛠️ Tech Stack
