@@ -4,6 +4,12 @@
 
 An interactive, high-velocity Streamlit application built to simulate, detect, and analyze fraudulent financial transactions in real-time. This application features live metric tracking, risk anomaly mapping, and geo-location breakdown of suspicious activities.
 
+
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/572dd15a-5c96-476f-a30c-5bc365adea58" />
+
+Image credits: Generated using Gemini
+
+
 ---
 
 ## 🚀 Features
