@@ -62,8 +62,9 @@ metric_row = st.empty()
 chart_row = st.empty()
 log_row = st.empty()
 
-# --- FLUID REAL-TIME FRAGMENT ENGINE ---
-@st.fragment
+# --- FIXED REAL-TIME FRAGMENT ENGINE ---
+# We bind simulation_speed directly here to control the native refresh rate
+@st.fragment(run_every=simulation_speed if run_simulation else None)
 def render_live_dashboard():
     """Isolated rerun scope that updates data and visual elements smoothly without resetting the whole page."""
     # 1. Pipeline Data Manipulation & Append
@@ -96,18 +97,13 @@ def render_live_dashboard():
         with col_left:
             st.subheader("Live Risk Score vs Transaction Amount")
             
-            # Pass render_mode directly into px.scatter
             fig_scatter = px.scatter(
                 df, x="Amount", y="Risk_Score", color=df["Is_Fraud"].astype(str),
                 color_discrete_map={"0": "#1f77b4", "1": "#ef553b"},
                 labels={"color": "Flagged Fraud"},
                 title="Real-time Anomaly Cluster Mapping",
-                render_mode="webgl"  # Added right here!
+                render_mode="webgl" 
             )
-            
-            # REMOVE OR COMMENT OUT THIS OLD LINE THAT CAUSED THE ERROR:
-            # fig_scatter.update_traces(render_mode="webgl") 
-            
             st.plotly_chart(fig_scatter, use_container_width=True, key="live_scatter_plot")
             
         with col_right:
@@ -128,13 +124,8 @@ def render_live_dashboard():
         styled_df = df.style.apply(highlight_fraud, axis=1)
         st.dataframe(styled_df, use_container_width=True, height=300, key="live_data_grid")
 
-# --- CONTEXT SCHEDULER ENGINE ---
+# --- EXECUTION ENTRANCE ---
 if run_simulation:
-    # Trigger the fragment execution loop
     render_live_dashboard()
-    # Emulate targeted connection stream delay constraints
-    time.sleep(simulation_speed)
-    # Target only fragment boundaries on re-evaluation
-    st.rerun()
 else:
     st.info("Streaming paused. Toggle 'Start Live Monitoring Stream' in the sidebar to resume.")
