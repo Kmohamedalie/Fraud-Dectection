@@ -57,25 +57,20 @@ if clear_data:
     ])
     st.rerun()
 
-# --- LIVE DASHBOARD CONTAINERS ---
-# We use empty containers so placeholders dynamically re-render on screen
+# --- STATIC CONTAINERS (Prevents Page Layout Shifting) ---
 metric_row = st.empty()
 chart_row = st.empty()
 log_row = st.empty()
 
-# --- CONTINUOUS STREAM LOOP ---
-while run_simulation:
+# --- FLUID REAL-TIME FRAGMENT ENGINE ---
+@st.fragment
+def render_live_dashboard():
+    """Isolated rerun scope that updates data and visual elements smoothly without resetting the whole page."""
+    # 1. Pipeline Data Manipulation & Append
     new_tx = generate_mock_transaction()
-    
-    # OLD CODE:
-    # st.session_state.transaction_history = pd.concat([
-    #     pd.DataFrame([new_tx]), st.session_state.transaction_history
-    # ]).head(100)
-    
-    # NEW FIXED CODE:
     st.session_state.transaction_history = pd.concat([
         pd.DataFrame([new_tx]), st.session_state.transaction_history
-    ]).reset_index(drop=True).head(100) # Added .reset_index(drop=True) here!
+    ]).reset_index(drop=True).head(100)  # Capped history window & fixed unique index
     
     df = st.session_state.transaction_history
     
@@ -86,7 +81,7 @@ while run_simulation:
     fraud_rate = (total_fraud / total_tx * 100) if total_tx > 0 else 0
     total_volume = df["Amount"].sum()
     
-    # 3. Update Metric Cards
+    # 2. Render Metric Cards
     with metric_row.container():
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("Total Processed (Window)", f"{total_tx}")
@@ -94,7 +89,7 @@ while run_simulation:
         col3.metric("Current Fraud Rate", f"{fraud_rate:.1f}%")
         col4.metric("Monitored Volume", f"${total_volume:,.2f}")
         
-    # 4. Update Charts
+    # 3. Render Visual Graphics
     with chart_row.container():
         col_left, col_right = st.columns(2)
         
@@ -106,31 +101,35 @@ while run_simulation:
                 labels={"color": "Flagged Fraud"},
                 title="Real-time Anomaly Cluster Mapping"
             )
-            st.plotly_chart(fig_scatter, use_container_width=True)
+            # Force WebGL mode rendering onto GPU to bypass browser SVG element stutter
+            fig_scatter.update_traces(render_mode="webgl")
+            st.plotly_chart(fig_scatter, use_container_width=True, key="live_scatter_plot")
             
         with col_right:
             st.subheader("Alert Breakdown by Location")
             if total_fraud > 0:
                 fig_pie = px.pie(fraud_df, names="Location", title="High Risk Locations Source")
-                st.plotly_chart(fig_pie, use_container_width=True)
+                st.plotly_chart(fig_pie, use_container_width=True, key="live_pie_chart")
             else:
                 st.info("No fraudulent activities detected yet in this stream window.")
 
-    # 5. Update Live Alert Logs
+    # 4. Render Activity Feed Logs
     with log_row.container():
         st.subheader("Activity Feed (Latest First)")
         
-        # Color code rows or safely display dataframes
         def highlight_fraud(row):
             return ['background-color: #ffcccc' if row.Is_Fraud == 1 else '' for _ in row]
         
         styled_df = df.style.apply(highlight_fraud, axis=1)
-        st.dataframe(styled_df, use_container_width=True, height=300)
-        
-    # Pause for specified interval before repeating the loop
-    time.sleep(simulation_speed)
-    st.rerun()
+        st.dataframe(styled_df, use_container_width=True, height=300, key="live_data_grid")
 
-# If user turns off the toggle
-if not run_simulation:
+# --- CONTEXT SCHEDULER ENGINE ---
+if run_simulation:
+    # Trigger the fragment execution loop
+    render_live_dashboard()
+    # Emulate targeted connection stream delay constraints
+    time.sleep(simulation_speed)
+    # Target only fragment boundaries on re-evaluation
+    st.rerun()
+else:
     st.info("Streaming paused. Toggle 'Start Live Monitoring Stream' in the sidebar to resume.")
